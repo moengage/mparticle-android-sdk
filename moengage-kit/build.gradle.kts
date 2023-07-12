@@ -39,4 +39,8 @@ android {
 dependencies {
     api("com.mparticle:android-kit-base:5.51.3")
     compileOnly(moengage.core)
+
+    testImplementation(moengage.core)
+    testImplementation(moengageInternal.bundles.junitBundle)
+    testImplementation("org.mockito:mockito-core:5.3.1")
 }

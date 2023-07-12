@@ -41,7 +41,7 @@ import java.lang.Exception
 /**
  * MoEngage Kit to integrate MoEngage Android SDK with mParticle Android SDK
  */
-class MoEngageKit : KitIntegration(), IdentityListener, UserAttributeListener, EventListener,
+open class MoEngageKit : KitIntegration(), IdentityListener, UserAttributeListener, EventListener,
     PushListener {
 
     private lateinit var moEngageIntegrationHelper: MoEIntegrationHelper
@@ -49,7 +49,7 @@ class MoEngageKit : KitIntegration(), IdentityListener, UserAttributeListener, E
 
     override fun getName(): String = KIT_NAME
 
-    override fun onKitCreate(
+    public override fun onKitCreate(
         settings: MutableMap<String, String?>,
         context: Context
     ): MutableList<ReportingMessage> {
@@ -235,6 +235,8 @@ class MoEngageKit : KitIntegration(), IdentityListener, UserAttributeListener, E
     ): List<ReportingMessage> = emptyList()
 
     override fun logEvent(event: MPEvent): MutableList<ReportingMessage> {
+        if (event.eventName.isBlank()) return mutableListOf()
+
         val properties = Properties()
         event.customAttributeStrings?.let { customAttributes ->
             for ((customAttributesKey, customAttributesValue) in customAttributes) {
