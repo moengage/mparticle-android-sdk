@@ -10,13 +10,13 @@ import com.moengage.core.analytics.MoEAnalyticsHelper
 import com.moengage.core.disableDataTracking
 import com.moengage.core.enableDataTracking
 import com.moengage.core.internal.INSTALL_REFERRER_EVENT
-import com.moengage.core.internal.integrations.MoEIntegrationHelper
-import com.moengage.core.internal.model.IntegrationMeta
-import com.moengage.core.model.IntegrationPartner
 import com.moengage.core.internal.USER_ATTRIBUTE_USER_FIRST_NAME
 import com.moengage.core.internal.USER_ATTRIBUTE_USER_GENDER
 import com.moengage.core.internal.USER_ATTRIBUTE_USER_LAST_NAME
 import com.moengage.core.internal.USER_ATTRIBUTE_USER_MOBILE
+import com.moengage.core.internal.integrations.MoEIntegrationHelper
+import com.moengage.core.internal.model.IntegrationMeta
+import com.moengage.core.model.IntegrationPartner
 import com.moengage.firebase.MoEFireBaseHelper
 import com.moengage.pushbase.MoEPushHelper
 import com.mparticle.MPEvent
@@ -30,10 +30,10 @@ import com.mparticle.identity.MParticleUser
 import com.mparticle.kits.FilteredIdentityApiRequest
 import com.mparticle.kits.FilteredMParticleUser
 import com.mparticle.kits.KitIntegration
-import com.mparticle.kits.KitIntegration.IdentityListener
-import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.KitIntegration.EventListener
+import com.mparticle.kits.KitIntegration.IdentityListener
 import com.mparticle.kits.KitIntegration.PushListener
+import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.KitUtils
 import com.mparticle.kits.ReportingMessage
 import java.lang.Exception
@@ -41,8 +41,8 @@ import java.lang.Exception
 /**
  * MoEngage Kit to integrate MoEngage Android SDK with mParticle Android SDK
  */
-open class MoEngageKit : KitIntegration(), IdentityListener, UserAttributeListener, EventListener,
-    PushListener {
+open class MoEngageKit :
+    KitIntegration(), IdentityListener, UserAttributeListener, EventListener, PushListener {
 
     private lateinit var moEngageIntegrationHelper: MoEIntegrationHelper
     private lateinit var moEngageAppId: String
@@ -61,7 +61,8 @@ open class MoEngageKit : KitIntegration(), IdentityListener, UserAttributeListen
             IntegrationMeta(
                 INTEGRATION_META_TYPE,
                 BuildConfig.MOENGAGE_KIT_VERSION
-            ), appId
+            ),
+            appId
         )
 
         this.moEngageAppId = appId
@@ -106,8 +107,11 @@ open class MoEngageKit : KitIntegration(), IdentityListener, UserAttributeListen
         email?.let { MoEAnalyticsHelper.setEmailId(context, it, moEngageAppId) }
         phone?.let { MoEAnalyticsHelper.setEmailId(context, it, moEngageAppId) }
         uniqueId?.let { id ->
-            if (isUserModified) MoEAnalyticsHelper.setAlias(context, id)
-            else MoEAnalyticsHelper.setUniqueId(context, id, moEngageAppId)
+            if (isUserModified) {
+                MoEAnalyticsHelper.setAlias(context, id)
+            } else {
+                MoEAnalyticsHelper.setUniqueId(context, id, moEngageAppId)
+            }
         }
     }
 
@@ -132,8 +136,11 @@ open class MoEngageKit : KitIntegration(), IdentityListener, UserAttributeListen
     }
 
     override fun setOptOut(optedOut: Boolean): MutableList<ReportingMessage> {
-        if (optedOut) disableDataTracking(context, moEngageAppId)
-        else enableDataTracking(context, moEngageAppId)
+        if (optedOut) {
+            disableDataTracking(context, moEngageAppId)
+        } else {
+            enableDataTracking(context, moEngageAppId)
+        }
 
         val messages: MutableList<ReportingMessage> = ArrayList()
         messages.add(

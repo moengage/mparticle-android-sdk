@@ -6,7 +6,7 @@ import com.mparticle.identity.MParticleUser
 import com.mparticle.kits.CUSTOMER_ID
 import com.mparticle.kits.EMAIL
 
-class MockIdentityApi: IdentityApi() {
+class MockIdentityApi : IdentityApi() {
 
     override fun getCurrentUser(): MParticleUser {
         val identity = HashMap<MParticle.IdentityType, String>()
