@@ -6,6 +6,9 @@ import com.mparticle.identity.MParticleUser
 import com.mparticle.kits.CUSTOMER_ID
 import com.mparticle.kits.EMAIL
 
+/**
+ * Mock [IdentityApi] Class
+ */
 class MockIdentityApi : IdentityApi() {
 
     override fun getCurrentUser(): MParticleUser {

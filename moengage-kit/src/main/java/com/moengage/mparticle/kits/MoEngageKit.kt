@@ -15,6 +15,7 @@ import com.moengage.core.internal.USER_ATTRIBUTE_USER_GENDER
 import com.moengage.core.internal.USER_ATTRIBUTE_USER_LAST_NAME
 import com.moengage.core.internal.USER_ATTRIBUTE_USER_MOBILE
 import com.moengage.core.internal.integrations.MoEIntegrationHelper
+import com.moengage.core.internal.logger.Logger
 import com.moengage.core.internal.model.IntegrationMeta
 import com.moengage.core.model.IntegrationPartner
 import com.moengage.firebase.MoEFireBaseHelper
@@ -65,6 +66,7 @@ open class MoEngageKit :
             appId
         )
 
+        Logger.print { "$tag onKitCreate(): mParticle Integration Initialised" }
         this.moEngageAppId = appId
         val messages: MutableList<ReportingMessage> = ArrayList()
         messages.add(
@@ -107,6 +109,7 @@ open class MoEngageKit :
         email?.let { MoEAnalyticsHelper.setEmailId(context, it, moEngageAppId) }
         phone?.let { MoEAnalyticsHelper.setEmailId(context, it, moEngageAppId) }
         uniqueId?.let { id ->
+            Logger.print { "$tag updateUserIds(): isUserModified-$isUserModified, UniqueId-$uniqueId" }
             if (isUserModified) {
                 MoEAnalyticsHelper.setAlias(context, id)
             } else {
@@ -123,6 +126,7 @@ open class MoEngageKit :
     }
 
     override fun onUserIdentified(mParticleUser: MParticleUser) {
+        Logger.print { "$tag onUserIdentified(): mParticle Id: ${mParticleUser.id}" }
         moEngageIntegrationHelper.trackAnonymousId(mParticleUser.id.toString(), moEngageAppId)
     }
 
@@ -136,6 +140,7 @@ open class MoEngageKit :
     }
 
     override fun setOptOut(optedOut: Boolean): MutableList<ReportingMessage> {
+        Logger.print { "$tag setOptOut(): is tracking opted in-$optedOut" }
         if (optedOut) {
             disableDataTracking(context, moEngageAppId)
         } else {
@@ -219,6 +224,7 @@ open class MoEngageKit :
     override fun supportsAttributeLists(): Boolean = true
 
     private fun trackUserAttribute(attributeKey: String, attributeValue: Any) {
+        Logger.print { "$tag trackUserAttribute(): Key-$attributeKey, Value-$attributeKey" }
         val mappedKey = attributeKeyMap[attributeKey] ?: attributeKey
         MoEAnalyticsHelper.setUserAttribute(context, mappedKey, attributeValue, moEngageAppId)
     }
@@ -278,7 +284,9 @@ open class MoEngageKit :
     }
 
     companion object {
-        internal const val KIT_NAME = "MoEngage"
+        private const val tag = "MoEngageKit_${BuildConfig.MOENGAGE_KIT_VERSION}"
+
+        const val KIT_NAME = "MoEngage"
         internal const val MOE_APP_ID_KEY = "appId"
         internal const val INTEGRATION_META_TYPE = "mparticle_native"
         internal const val REFERRER_EXTRA = "referrer"

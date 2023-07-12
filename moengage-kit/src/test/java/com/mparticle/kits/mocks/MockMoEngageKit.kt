@@ -7,6 +7,9 @@ import com.mparticle.internal.ReportingManager
 import com.mparticle.kits.KitConfiguration
 import org.mockito.Mockito
 
+/**
+ * Mock [MoEngageKit] Class
+ */
 class MockMoEngageKit : MoEngageKit() {
 
     init {

@@ -2,6 +2,7 @@ package com.mparticle.kits
 
 import android.content.Context
 import com.moengage.mparticle.kits.MoEngageKit
+import com.moengage.mparticle.kits.MoEngageKit.Companion.KIT_NAME
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.identity.MParticleUser
@@ -13,6 +14,9 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 
+/**
+ * Test Class to test the functionality of [MoEngageKit]
+ */
 internal class MoEngageKitTest {
 
     private val kit: KitIntegration
@@ -22,17 +26,26 @@ internal class MoEngageKitTest {
 
     @Before
     fun setup() {
+        // Setup the MockMoEngageKit instance to use later
         mockMoEngageKit.onKitCreate(
             hashMapOf(MOE_APP_ID_KEY to MoEngage_APP_ID),
             MockApplicationContext()
         )
     }
 
+    /**
+     * Description: Test getName of MoEngageKit
+     * Excepted: kit name should equal to [KIT_NAME]
+     */
     @Test
     fun testGetName() {
         Assert.assertEquals(kit.name, KIT_NAME)
     }
 
+    /**
+     * Description: Test onKitCreate method with invalid setting.
+     * Expected Result: Should throw exception as App Id is mandatory
+     */
     @Test
     @Throws(Exception::class)
     fun testOnKitCreateWithInValidSetting() {
@@ -45,6 +58,10 @@ internal class MoEngageKitTest {
         Assert.assertNotNull(exception)
     }
 
+    /**
+     * Description: Test onKitCreate method with valid setting.
+     * Expected Result: Should process the request properly without any exception
+     */
     @Test
     @Throws(Exception::class)
     fun testOnKitCreateWithValidSetting() {
@@ -60,6 +77,10 @@ internal class MoEngageKitTest {
         Assert.assertNull(exception)
     }
 
+    /**
+     * Description: Test User Identity management methods with invalid user data
+     * Expected Result: Should not throw any exception even with invalid data
+     */
     @Test
     fun testUserIdentityWithInValidData() {
         var exception: Exception? = null
@@ -74,6 +95,10 @@ internal class MoEngageKitTest {
         Assert.assertNull(exception)
     }
 
+    /**
+     * Description: Test User Identity management methods with valid user data
+     * Expected Result: Should process the request without any exception
+     */
     @Test
     fun testUserIdentityWithValidData() {
         var exception: Exception? = null
@@ -92,6 +117,10 @@ internal class MoEngageKitTest {
         Assert.assertNull(exception)
     }
 
+    /**
+     * Description: Test Event Log without any event attributes
+     * Expected Result: should return proper list of [ReportingMessage]
+     */
     @Test
     fun logEventWithWithoutAttributes() {
         val eventWithProperties = MPEvent.Builder(
@@ -102,6 +131,10 @@ internal class MoEngageKitTest {
         Assert.assertTrue(result.isNotEmpty())
     }
 
+    /**
+     * Description: Test Event Log with event attributes
+     * Expected Result: should return proper list of [ReportingMessage]
+     */
     @Test
     fun logEventWithAttributes() {
         val eventWithProperties = MPEvent.Builder(
@@ -118,6 +151,10 @@ internal class MoEngageKitTest {
         Assert.assertTrue(result.isNotEmpty())
     }
 
+    /**
+     * Description: Test Event Log with invalid event name
+     * Expected Result: should return empty list of [ReportingMessage]
+     */
     @Test
     fun logEventWithInvalidData() {
         val result = mockMoEngageKit.logEvent(MPEvent.Builder("").build())

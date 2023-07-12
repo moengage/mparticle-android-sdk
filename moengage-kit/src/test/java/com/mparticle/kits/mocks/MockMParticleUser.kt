@@ -6,6 +6,9 @@ import com.mparticle.consent.ConsentState
 import com.mparticle.identity.MParticleUser
 import com.mparticle.kits.M_PARTICLE_ID
 
+/**
+ * Mock [MParticleUser] Class
+ */
 class MockMParticleUser(
     private val identities: Map<MParticle.IdentityType, String>
 ) : MParticleUser {

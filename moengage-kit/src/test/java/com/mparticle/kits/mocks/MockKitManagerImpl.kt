@@ -7,6 +7,9 @@ import com.mparticle.internal.ReportingManager
 import com.mparticle.kits.KitManagerImpl
 import org.mockito.Mockito
 
+/**
+ * Mock [KitManagerImpl] Class
+ */
 class MockKitManagerImpl(
     context: Context,
     reportingManager: ReportingManager,
