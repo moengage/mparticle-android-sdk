@@ -6,6 +6,7 @@ plugins {
 
 apply(from = "../scripts/gradle/release.gradle")
 
+val libVersionName = project.findProperty("VERSION_NAME") as String
 android {
     namespace = "com.moengage.mparticle.kits"
     compileSdk = 33
@@ -13,6 +14,8 @@ android {
     defaultConfig {
         minSdk = 21
         targetSdk = 33
+
+        buildConfigField("String", "MOENGAGE_KIT_VERSION", "\"$libVersionName\"")
     }
 
     buildTypes {
