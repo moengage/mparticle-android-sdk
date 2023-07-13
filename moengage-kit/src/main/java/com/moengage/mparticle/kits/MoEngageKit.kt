@@ -287,12 +287,12 @@ open class MoEngageKit :
         private const val tag = "MoEngageKit_${BuildConfig.MOENGAGE_KIT_VERSION}"
 
         const val KIT_NAME = "MoEngage"
-        internal const val MOE_APP_ID_KEY = "appId"
-        internal const val INTEGRATION_META_TYPE = "mparticle_native"
-        internal const val REFERRER_EXTRA = "referrer"
-        internal const val PREF_KEY_HAS_SYNCED_ATTRIBUTES = "moengage::has_synced_attributes"
+        private const val MOE_APP_ID_KEY = "appId"
+        private const val INTEGRATION_META_TYPE = "mparticle_native"
+        private const val REFERRER_EXTRA = "referrer"
+        private const val PREF_KEY_HAS_SYNCED_ATTRIBUTES = "moengage::has_synced_attributes"
 
-        val attributeKeyMap: Map<String, String> = mapOf(
+        private val attributeKeyMap: Map<String, String> = mapOf(
             MOBILE_NUMBER to USER_ATTRIBUTE_USER_MOBILE,
             GENDER to USER_ATTRIBUTE_USER_GENDER,
             FIRSTNAME to USER_ATTRIBUTE_USER_FIRST_NAME,
