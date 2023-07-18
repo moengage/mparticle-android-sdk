@@ -107,11 +107,11 @@ open class MoEngageKit :
         val uniqueId = mParticleUser.userIdentities[IdentityType.CustomerId]
 
         email?.let { MoEAnalyticsHelper.setEmailId(context, it, moEngageAppId) }
-        phone?.let { MoEAnalyticsHelper.setEmailId(context, it, moEngageAppId) }
+        phone?.let { MoEAnalyticsHelper.setMobileNumber(context, it, moEngageAppId) }
         uniqueId?.let { id ->
             Logger.print { "$tag updateUserIds(): isUserModified-$isUserModified, UniqueId-$uniqueId" }
             if (isUserModified) {
-                MoEAnalyticsHelper.setAlias(context, id)
+                MoEAnalyticsHelper.setAlias(context, id, moEngageAppId)
             } else {
                 MoEAnalyticsHelper.setUniqueId(context, id, moEngageAppId)
             }
@@ -224,8 +224,11 @@ open class MoEngageKit :
     override fun supportsAttributeLists(): Boolean = true
 
     private fun trackUserAttribute(attributeKey: String, attributeValue: Any) {
-        Logger.print { "$tag trackUserAttribute(): Key-$attributeKey, Value-$attributeKey" }
-        val mappedKey = attributeKeyMap[attributeKey] ?: attributeKey
+        Logger.print { "$tag trackUserAttribute(): Key-$attributeKey, Value-$attributeValue" }
+        var mappedKey = attributeKeyMap[attributeKey] ?: attributeKey
+        if (mappedKey.startsWith("$")) {
+            mappedKey = mappedKey.substring(1)
+        }
         MoEAnalyticsHelper.setUserAttribute(context, mappedKey, attributeValue, moEngageAppId)
     }
 
