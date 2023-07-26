@@ -38,6 +38,9 @@ dependencyResolutionManagement {
         create("moengage") {
             from("com.moengage:android-dependency-catalog:3.1.0")
         }
+        create("appLibs") {
+            from(files("./gradle/appLibs.versions.toml"))
+        }
     }
 }
 

@@ -25,7 +25,6 @@ android {
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
 
         buildConfigField("String", "MOENGAGE_KIT_VERSION", "\"$libVersionName\"")
     }

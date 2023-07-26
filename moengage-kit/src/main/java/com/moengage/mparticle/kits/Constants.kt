@@ -21,4 +21,6 @@ internal const val INTEGRATION_META_TYPE = "mparticle_native"
 
 internal const val REFERRER_EXTRA = "referrer"
 
+internal const val EVENT_TYPE_PROPERTIES = "event_type"
+
 internal const val PREF_KEY_HAS_SYNCED_ATTRIBUTES = "moengage::has_synced_attributes"
