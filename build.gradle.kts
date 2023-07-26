@@ -3,8 +3,8 @@ plugins {
     alias(moengageInternal.plugins.plugin.android.app) apply false
     alias(moengageInternal.plugins.plugin.android.lib) apply false
     alias(moengageInternal.plugins.plugin.kotlin.android) apply false
-    id("com.google.gms.google-services") version "4.3.15" apply false
-    id("org.jlleitschuh.gradle.ktlint") version("11.3.1")
+    alias(moengageInternal.plugins.plugin.ktlint) apply false
+    alias(libs.plugins.plugin.google.services) apply false
 }
 
 subprojects {

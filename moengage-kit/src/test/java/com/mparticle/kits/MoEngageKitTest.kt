@@ -1,8 +1,8 @@
 package com.mparticle.kits
 
 import android.content.Context
+import com.moengage.mparticle.kits.KIT_NAME
 import com.moengage.mparticle.kits.MoEngageKit
-import com.moengage.mparticle.kits.MoEngageKit.Companion.KIT_NAME
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.identity.MParticleUser
@@ -18,9 +18,6 @@ import org.mockito.Mockito
  * Test Class to test the functionality of [MoEngageKit]
  */
 internal class MoEngageKitTest {
-
-    private val kit: KitIntegration
-        get() = MoEngageKit()
 
     private val mockMoEngageKit = MockMoEngageKit()
 
@@ -39,7 +36,7 @@ internal class MoEngageKitTest {
      */
     @Test
     fun testGetName() {
-        Assert.assertEquals(kit.name, KIT_NAME)
+        Assert.assertEquals(mockMoEngageKit.name, KIT_NAME)
     }
 
     /**
@@ -51,7 +48,7 @@ internal class MoEngageKitTest {
     fun testOnKitCreateWithInValidSetting() {
         var exception: Exception? = null
         try {
-            kit.onKitCreate(hashMapOf(), Mockito.mock(Context::class.java))
+            mockMoEngageKit.onKitCreate(hashMapOf(), Mockito.mock(Context::class.java))
         } catch (e: Exception) {
             exception = e
         }

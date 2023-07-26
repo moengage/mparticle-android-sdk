@@ -2,18 +2,17 @@
 plugins {
     alias(moengageInternal.plugins.plugin.android.lib)
     alias(moengageInternal.plugins.plugin.kotlin.android)
+    id("mvn-publish")
 }
-
-apply(from = "../scripts/gradle/release.gradle")
 
 val libVersionName = project.findProperty("VERSION_NAME") as String
 android {
     namespace = "com.moengage.mparticle.kits"
-    compileSdk = 33
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = 21
-        targetSdk = 33
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
 
         buildConfigField("String", "MOENGAGE_KIT_VERSION", "\"$libVersionName\"")
     }
@@ -37,10 +36,19 @@ android {
 }
 
 dependencies {
-    api("com.mparticle:android-kit-base:5.51.3")
-    compileOnly(moengage.core)
+    compileOnly(libs.mParticleAndroidKitBase)
+    compileOnly(moengage.core) {
+        exclude("com.moengage", "core")
+    }
+    // Todo: Remove this Snapshot build dependency
+    compileOnly("com.moengage:core:6.8.1-SNAPSHOT")
 
-    testImplementation(moengage.core)
+    testImplementation(moengage.core) {
+        exclude("com.moengage", "core")
+    }
+    // Todo: Remove this Snapshot build dependency
+    testImplementation("com.moengage:core:6.8.1-SNAPSHOT")
+    testImplementation(libs.mParticleAndroidKitBase)
     testImplementation(moengageInternal.bundles.junitBundle)
-    testImplementation("org.mockito:mockito-core:5.3.1")
+    testImplementation(libs.mockito)
 }

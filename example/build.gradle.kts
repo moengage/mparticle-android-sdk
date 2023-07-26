@@ -43,12 +43,17 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-process:2.5.1")
 
     // mParticle
+    implementation("com.mparticle:android-kit-base:5.51.3")
     implementation("com.mparticle:android-core:5.51.3")
     implementation("com.android.installreferrer:installreferrer:2.2")
 
     // MoEngage
     implementation(projects.moengageKit)
-    implementation(moengage.core)
+    implementation(moengage.core) {
+        exclude("com.moengage", "core")
+    }
+    // Todo: Remove this Snapshot build dependency
+    implementation("com.moengage:core:6.8.1-SNAPSHOT")
     implementation(moengageInternal.kotlinStdLib)
 
     // Common

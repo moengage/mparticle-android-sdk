@@ -4,12 +4,15 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.location.Location
+import com.moengage.core.LogLevel
 import com.moengage.core.MoECoreHelper
 import com.moengage.core.Properties
 import com.moengage.core.analytics.MoEAnalyticsHelper
 import com.moengage.core.disableDataTracking
 import com.moengage.core.enableDataTracking
+import com.moengage.core.exceptions.SdkNotInitializedException
 import com.moengage.core.internal.INSTALL_REFERRER_EVENT
+import com.moengage.core.internal.SdkInstanceManager
 import com.moengage.core.internal.USER_ATTRIBUTE_USER_FIRST_NAME
 import com.moengage.core.internal.USER_ATTRIBUTE_USER_GENDER
 import com.moengage.core.internal.USER_ATTRIBUTE_USER_LAST_NAME
@@ -17,6 +20,8 @@ import com.moengage.core.internal.USER_ATTRIBUTE_USER_MOBILE
 import com.moengage.core.internal.integrations.MoEIntegrationHelper
 import com.moengage.core.internal.logger.Logger
 import com.moengage.core.internal.model.IntegrationMeta
+import com.moengage.core.internal.model.SdkInstance
+import com.moengage.core.internal.utils.currentMillis
 import com.moengage.core.model.IntegrationPartner
 import com.moengage.firebase.MoEFireBaseHelper
 import com.moengage.pushbase.MoEPushHelper
@@ -37,7 +42,7 @@ import com.mparticle.kits.KitIntegration.PushListener
 import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.KitUtils
 import com.mparticle.kits.ReportingMessage
-import java.lang.Exception
+import kotlin.jvm.Throws
 
 /**
  * MoEngage Kit to integrate MoEngage Android SDK with mParticle Android SDK
@@ -45,8 +50,11 @@ import java.lang.Exception
 open class MoEngageKit :
     KitIntegration(), IdentityListener, UserAttributeListener, EventListener, PushListener {
 
-    private lateinit var moEngageIntegrationHelper: MoEIntegrationHelper
-    private lateinit var moEngageAppId: String
+    private val tag = "MoEngageKit_${BuildConfig.MOENGAGE_KIT_VERSION}"
+
+    private lateinit var integrationHelper: MoEIntegrationHelper
+    private lateinit var appId: String
+    private lateinit var sdkInstance: SdkInstance
 
     override fun getName(): String = KIT_NAME
 
@@ -54,10 +62,11 @@ open class MoEngageKit :
         settings: MutableMap<String, String?>,
         context: Context
     ): MutableList<ReportingMessage> {
+        Logger.print { "$tag onKitCreate(): " }
         val appId = settings[MOE_APP_ID_KEY]
         require(appId != null && !KitUtils.isEmpty(appId)) { "MoEngage App Id can't be empty" }
-        moEngageIntegrationHelper = MoEIntegrationHelper(context, IntegrationPartner.M_PARTICLE)
-        moEngageIntegrationHelper.initialize(appId, context.applicationContext as Application)
+        integrationHelper = MoEIntegrationHelper(context, IntegrationPartner.M_PARTICLE)
+        integrationHelper.initialize(appId, context.applicationContext as Application)
         MoEIntegrationHelper.addIntegrationMeta(
             IntegrationMeta(
                 INTEGRATION_META_TYPE,
@@ -66,55 +75,86 @@ open class MoEngageKit :
             appId
         )
 
-        Logger.print { "$tag onKitCreate(): mParticle Integration Initialised" }
-        this.moEngageAppId = appId
-        val messages: MutableList<ReportingMessage> = ArrayList()
-        messages.add(
+        this.appId = appId
+        this.sdkInstance = getSdkInstance(appId)
+        Logger.print { "$tag onKitCreate(): mParticle Integration Initialised for $appId" }
+
+        return mutableListOf(
             ReportingMessage(
                 this,
                 ReportingMessage.MessageType.APP_STATE_TRANSITION,
-                System.currentTimeMillis(),
+                currentMillis(),
                 null
             )
         )
-        return messages
     }
 
     override fun onIdentifyCompleted(
         mParticleUser: MParticleUser,
         identityApiRequest: FilteredIdentityApiRequest?
     ) {
-        updateUserIds(false, mParticleUser)
+        try {
+            sdkInstance.logger.log { "$tag onIdentifyCompleted(): " }
+            updateUserIds(false, mParticleUser)
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag onIdentifyCompleted(): " }
+        }
     }
 
     override fun onLoginCompleted(
         mParticleUser: MParticleUser,
         identityApiRequest: FilteredIdentityApiRequest?
     ) {
-        updateUserIds(false, mParticleUser)
+        try {
+            sdkInstance.logger.log { "$tag onLoginCompleted(): " }
+            updateUserIds(false, mParticleUser)
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag onLoginCompleted(): " }
+        }
     }
 
     override fun onModifyCompleted(
         mParticleUser: MParticleUser,
         identityApiRequest: FilteredIdentityApiRequest?
     ) {
-        updateUserIds(true, mParticleUser)
+        try {
+            sdkInstance.logger.log { "$tag onModifyCompleted(): " }
+            updateUserIds(true, mParticleUser)
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag onModifyCompleted(): " }
+        }
     }
 
     private fun updateUserIds(isUserModified: Boolean, mParticleUser: MParticleUser) {
-        val email = mParticleUser.userIdentities[IdentityType.Email]
-        val phone = mParticleUser.userIdentities[IdentityType.MobileNumber]
-        val uniqueId = mParticleUser.userIdentities[IdentityType.CustomerId]
+        try {
+            sdkInstance.logger.log { "$tag updateUserIds(): isUserModified = $isUserModified" }
 
-        email?.let { MoEAnalyticsHelper.setEmailId(context, it, moEngageAppId) }
-        phone?.let { MoEAnalyticsHelper.setMobileNumber(context, it, moEngageAppId) }
-        uniqueId?.let { id ->
-            Logger.print { "$tag updateUserIds(): isUserModified-$isUserModified, UniqueId-$uniqueId" }
-            if (isUserModified) {
-                MoEAnalyticsHelper.setAlias(context, id, moEngageAppId)
-            } else {
-                MoEAnalyticsHelper.setUniqueId(context, id, moEngageAppId)
+            mParticleUser.userIdentities[IdentityType.Email]?.let { email ->
+                MoEAnalyticsHelper.setEmailId(
+                    context,
+                    email,
+                    appId
+                )
             }
+
+            mParticleUser.userIdentities[IdentityType.MobileNumber]?.let { mobileNumber ->
+                MoEAnalyticsHelper.setMobileNumber(
+                    context,
+                    mobileNumber,
+                    appId
+                )
+            }
+
+            mParticleUser.userIdentities[IdentityType.CustomerId]?.let { id ->
+                Logger.print { "$tag updateUserIds(): isUserModified-$isUserModified, UniqueId-$id" }
+                if (isUserModified) {
+                    MoEAnalyticsHelper.setAlias(context, id, appId)
+                } else {
+                    MoEAnalyticsHelper.setUniqueId(context, id, appId)
+                }
+            }
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag updateUserIds(): " }
         }
     }
 
@@ -122,52 +162,76 @@ open class MoEngageKit :
         mParticleUser: MParticleUser,
         identityApiRequest: FilteredIdentityApiRequest?
     ) {
-        MoECoreHelper.logoutUser(context, moEngageAppId)
+        try {
+            sdkInstance.logger.log { "$tag onLogoutCompleted(): " }
+            MoECoreHelper.logoutUser(context, appId)
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag onLogoutCompleted(): " }
+        }
     }
 
     override fun onUserIdentified(mParticleUser: MParticleUser) {
-        Logger.print { "$tag onUserIdentified(): mParticle Id: ${mParticleUser.id}" }
-        moEngageIntegrationHelper.trackAnonymousId(mParticleUser.id.toString(), moEngageAppId)
+        try {
+            sdkInstance.logger.log { "$tag onUserIdentified(): mParticle Id: ${mParticleUser.id}" }
+            integrationHelper.trackAnonymousId(mParticleUser.id.toString(), appId)
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag onUserIdentified(): " }
+        }
     }
 
     override fun setLocation(location: Location) {
-        MoEAnalyticsHelper.setLocation(
-            context,
-            location.latitude,
-            location.longitude,
-            moEngageAppId
-        )
+        try {
+            sdkInstance.logger.log { "$tag setLocation(): " }
+            MoEAnalyticsHelper.setLocation(
+                context,
+                location.latitude,
+                location.longitude,
+                appId
+            )
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag setLocation(): " }
+        }
     }
 
     override fun setOptOut(optedOut: Boolean): MutableList<ReportingMessage> {
-        Logger.print { "$tag setOptOut(): is tracking opted in-$optedOut" }
-        if (optedOut) {
-            disableDataTracking(context, moEngageAppId)
-        } else {
-            enableDataTracking(context, moEngageAppId)
+        try {
+            sdkInstance.logger.log { "$tag setOptOut(): is tracking opted in-$optedOut" }
+            if (optedOut) {
+                disableDataTracking(context, appId)
+            } else {
+                enableDataTracking(context, appId)
+            }
+
+            return mutableListOf(
+                ReportingMessage(
+                    this,
+                    ReportingMessage.MessageType.OPT_OUT,
+                    currentMillis(),
+                    null
+                )
+            )
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag setOptOut(): " }
         }
 
-        val messages: MutableList<ReportingMessage> = ArrayList()
-        messages.add(
-            ReportingMessage(
-                this,
-                ReportingMessage.MessageType.OPT_OUT,
-                System.currentTimeMillis(),
-                null
-            )
-        )
-        return messages
+        return mutableListOf()
     }
 
     override fun setInstallReferrer(intent: Intent) {
-        val installReferrerProperties = Properties()
-        installReferrerProperties.addAttribute(REFERRER_EXTRA, intent.dataString)
-        MoEAnalyticsHelper.trackEvent(
-            context,
-            INSTALL_REFERRER_EVENT,
-            installReferrerProperties,
-            moEngageAppId
-        )
+        try {
+            sdkInstance.logger.log { "$tag setInstallReferrer(): data = ${intent.dataString}" }
+            val properties = Properties()
+            properties.addAttribute(REFERRER_EXTRA, intent.dataString)
+            properties.setNonInteractive()
+            MoEAnalyticsHelper.trackEvent(
+                context,
+                INSTALL_REFERRER_EVENT,
+                properties,
+                appId
+            )
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag setInstallReferrer(): " }
+        }
     }
 
     override fun onIncrementUserAttribute(
@@ -210,26 +274,38 @@ open class MoEngageKit :
         userAttributeLists: Map<String, List<String>>,
         user: FilteredMParticleUser
     ) {
-        if (!kitPreferences.getBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, false)) {
-            for ((attributeKey, attributeValue) in userAttributes) {
-                trackUserAttribute(attributeKey, attributeValue)
+        try {
+            sdkInstance.logger.log { "$tag onSetAllUserAttributes(): " }
+            if (!kitPreferences.getBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, false)) {
+                for ((attributeKey, attributeValue) in userAttributes) {
+                    trackUserAttribute(attributeKey, attributeValue)
+                }
+                for ((attributeKey, attributeValue) in userAttributeLists) {
+                    trackUserAttribute(attributeKey, attributeValue.toTypedArray())
+                }
+                kitPreferences.edit().putBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, true).apply()
             }
-            for ((attributeKey, attributeValue) in userAttributeLists) {
-                trackUserAttribute(attributeKey, attributeValue.toTypedArray())
-            }
-            kitPreferences.edit().putBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, true).apply()
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag onSetAllUserAttributes(): " }
         }
     }
 
     override fun supportsAttributeLists(): Boolean = true
 
     private fun trackUserAttribute(attributeKey: String, attributeValue: Any) {
-        Logger.print { "$tag trackUserAttribute(): Key-$attributeKey, Value-$attributeValue" }
-        var mappedKey = attributeKeyMap[attributeKey] ?: attributeKey
-        if (mappedKey.startsWith("$")) {
-            mappedKey = mappedKey.substring(1)
+        try {
+            sdkInstance.logger.log { "$tag trackUserAttribute(): Key-$attributeKey, Value-$attributeValue" }
+            var mappedKey = attributeKeyMap[attributeKey] ?: attributeKey
+
+            // All the mParticle standard attribute starts with "$".
+            // Removing the "$" from attribute as it's not required in MoEngage
+            if (mappedKey.startsWith("$")) {
+                mappedKey = mappedKey.substring(1)
+            }
+            MoEAnalyticsHelper.setUserAttribute(context, mappedKey, attributeValue, appId)
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag trackUserAttribute(): " }
         }
-        MoEAnalyticsHelper.setUserAttribute(context, mappedKey, attributeValue, moEngageAppId)
     }
 
     override fun leaveBreadcrumb(breadcrumb: String): List<ReportingMessage> = emptyList()
@@ -251,49 +327,72 @@ open class MoEngageKit :
     ): List<ReportingMessage> = emptyList()
 
     override fun logEvent(event: MPEvent): MutableList<ReportingMessage> {
-        if (event.eventName.isBlank()) return mutableListOf()
-
-        val properties = Properties()
-        event.customAttributeStrings?.let { customAttributes ->
-            for ((customAttributesKey, customAttributesValue) in customAttributes) {
-                properties.addAttribute(customAttributesKey, customAttributesValue)
+        try {
+            sdkInstance.logger.log { "$tag logEvent(): " }
+            if (event.eventName.isBlank()) {
+                sdkInstance.logger.log(LogLevel.WARN) { "$tag logEvent(): Event name can't be empty" }
+                return mutableListOf()
             }
-        }
-        MoEAnalyticsHelper.trackEvent(context, event.eventName, properties, moEngageAppId)
 
-        val messages: MutableList<ReportingMessage> = ArrayList()
-        messages.add(ReportingMessage.fromEvent(this, event))
-        return messages
+            val properties = Properties()
+            event.customAttributeStrings?.let { customAttributes ->
+                for ((customAttributesKey, customAttributesValue) in customAttributes) {
+                    properties.addAttribute(customAttributesKey, customAttributesValue)
+                }
+            }
+            MoEAnalyticsHelper.trackEvent(context, event.eventName, properties, appId)
+
+            return mutableListOf(ReportingMessage.fromEvent(this, event))
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag onKitCreate(): mParticle Integration Initialisation Failed" }
+        }
+
+        return mutableListOf()
     }
 
     override fun onPushRegistration(instanceId: String, senderId: String): Boolean {
-        MoEFireBaseHelper.getInstance().passPushToken(context, instanceId, moEngageAppId)
-        return true
+        try {
+            sdkInstance.logger.log { "$tag onPushRegistration(): instanceId = $instanceId " }
+            MoEFireBaseHelper.getInstance().passPushToken(context, instanceId, appId)
+            return true
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag onPushRegistration(): " }
+        }
+        return false
     }
 
     override fun willHandlePushMessage(intent: Intent): Boolean {
-        var isFromMoEngage = false
-        intent.extras?.let { bundle ->
-            isFromMoEngage = MoEPushHelper.getInstance().isFromMoEngagePlatform(bundle)
+        try {
+            sdkInstance.logger.log { "$tag willHandlePushMessage():" }
+            return intent.extras?.let { bundle ->
+                sdkInstance.logger.log { "$tag willHandlePushMessage(): checking if message is from MoEngage" }
+                MoEPushHelper.getInstance().isFromMoEngagePlatform(bundle)
+            } ?: false
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag willHandlePushMessage(): " }
         }
-
-        return isFromMoEngage
+        return false
     }
 
     override fun onPushMessageReceived(context: Context, pushIntent: Intent) {
-        pushIntent.extras?.let { bundle ->
-            MoEFireBaseHelper.getInstance().passPushPayload(context, bundle)
+        try {
+            sdkInstance.logger.log { "$tag onPushMessageReceived():" }
+            pushIntent.extras?.let { bundle ->
+                sdkInstance.logger.log { "$tag onPushMessageReceived(): Processing message" }
+                MoEFireBaseHelper.getInstance().passPushPayload(context, bundle)
+            }
+        } catch (t: Throwable) {
+            Logger.print(LogLevel.ERROR, t) { "$tag onPushMessageReceived(): " }
         }
     }
 
-    companion object {
-        private const val tag = "MoEngageKit_${BuildConfig.MOENGAGE_KIT_VERSION}"
+    @Throws(SdkNotInitializedException::class)
+    open fun getSdkInstance(appId: String): SdkInstance {
+        return SdkInstanceManager.getSdkInstance(appId)
+            ?: throw SdkNotInitializedException()
+    }
 
-        const val KIT_NAME = "MoEngage"
-        private const val MOE_APP_ID_KEY = "appId"
-        private const val INTEGRATION_META_TYPE = "mparticle_native"
-        private const val REFERRER_EXTRA = "referrer"
-        private const val PREF_KEY_HAS_SYNCED_ATTRIBUTES = "moengage::has_synced_attributes"
+    companion object {
 
         private val attributeKeyMap: Map<String, String> = mapOf(
             MOBILE_NUMBER to USER_ATTRIBUTE_USER_MOBILE,
