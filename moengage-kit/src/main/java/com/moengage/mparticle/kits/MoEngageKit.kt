@@ -392,7 +392,9 @@ open class MoEngageKit :
             sdkInstance.logger.log { "$tag willHandlePushMessage():" }
             return intent.extras?.let { bundle ->
                 sdkInstance.logger.log { "$tag willHandlePushMessage(): checking if message is from MoEngage" }
-                MoEPushHelper.getInstance().isFromMoEngagePlatform(bundle)
+                val isFromMoEngagePlatform = MoEPushHelper.getInstance().isFromMoEngagePlatform(bundle)
+                sdkInstance.logger.log { "$tag willHandlePushMessage(): isFromMoEngagePlatform = $isFromMoEngagePlatform" }
+                isFromMoEngagePlatform
             } ?: false
         } catch (t: Throwable) {
             sdkInstance.logger.log(LogLevel.ERROR, t) { "$tag willHandlePushMessage(): " }
