@@ -15,7 +15,10 @@ package com.moengage.mparticle.sampleapp
 
 import android.app.Application
 import com.moengage.core.DataCenter
+import com.moengage.core.LogLevel
 import com.moengage.core.MoEngage
+import com.moengage.core.config.LogConfig
+import com.moengage.core.config.NotificationConfig
 import com.moengage.core.model.IntegrationPartner
 import com.moengage.mparticle.kits.MoEngageKit
 import com.mparticle.MParticle
@@ -42,7 +45,7 @@ class SampleApplication : Application() {
         MParticle.start(options)
 
         // Register for push notifications
-        MParticle.getInstance()?.Messaging()?.enablePushNotifications(FCM_SENDER_ID)
+        // MParticle.getInstance()?.Messaging()?.enablePushNotifications(FCM_SENDER_ID)
 
         // disable push notifications
         // MParticle.getInstance()?.Messaging()?.disablePushNotifications()
@@ -51,7 +54,17 @@ class SampleApplication : Application() {
     private fun initializeMoEngageSdk() {
         val moEngage = MoEngage.Builder(this, MOENGAGE_APP_ID, DataCenter.DATA_CENTER_1)
             .enablePartnerIntegration(IntegrationPartner.M_PARTICLE)
-            .build()
+            .configureLogs(LogConfig(LogLevel.VERBOSE, true))
+            .configureNotificationMetaData(
+                NotificationConfig(
+                    R.drawable.small_icon,
+                    R.drawable.large_icon,
+                    R.color.purple_200,
+                    isMultipleNotificationInDrawerEnabled = true,
+                    isBuildingBackStackEnabled = false,
+                    isLargeIconDisplayEnabled = true
+                )
+            ).build()
 
         MoEngage.initialiseDefaultInstance(moEngage)
     }
