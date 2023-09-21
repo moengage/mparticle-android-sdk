@@ -52,8 +52,7 @@ class SampleApplication : Application() {
     }
 
     private fun initializeMoEngageSdk() {
-        val moEngage = MoEngage.Builder(this, MOENGAGE_APP_ID, DataCenter.DATA_CENTER_1)
-            .enablePartnerIntegration(IntegrationPartner.M_PARTICLE)
+        val moEngageBuilder = MoEngage.Builder(this, MOENGAGE_APP_ID, DataCenter.DATA_CENTER_1)
             .configureLogs(LogConfig(LogLevel.VERBOSE, true))
             .configureNotificationMetaData(
                 NotificationConfig(
@@ -64,8 +63,9 @@ class SampleApplication : Application() {
                     isBuildingBackStackEnabled = false,
                     isLargeIconDisplayEnabled = true
                 )
-            ).build()
+            )
 
-        MoEngage.initialiseDefaultInstance(moEngage)
+        // Configure the required configuration for MoEngage SDK
+        MoEngage.configureInitConfigForDefaultInstance(moEngageBuilder, IntegrationPartner.M_PARTICLE)
     }
 }
