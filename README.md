@@ -35,7 +35,7 @@ val moEngage = MoEngage.Builder(this, "YOUR APP ID", [YOUR_DATA_CENTER])
     .enablePartnerIntegration(IntegrationPartner.M_PARTICLE)
     .build()
 
-MoEngage.initialiseDefaultInstance(moEngage)
+MoEngage.configureInitConfigForDefaultInstance(moEngageBuilder, IntegrationPartner.M_PARTICLE)
 ```
 
 - Initialize the mParticle with MoEngage Kit

@@ -33,5 +33,3 @@ const val FCM_SENDER_ID = "YOUR SENDER ID"
  * Todo: Update the KitId
  */
 const val MOENGAGE_KIT_ID = -1
-
-

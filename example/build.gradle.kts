@@ -69,6 +69,6 @@ dependencies {
         exclude("com.moengage", "core")
     }
     // Todo: Remove this Snapshot build dependency
-    implementation("com.moengage:core:6.8.2-SNAPSHOT")
+    implementation("com.moengage:core:7.4.2-SNAPSHOT")
     implementation(moengageInternal.kotlinStdLib)
 }

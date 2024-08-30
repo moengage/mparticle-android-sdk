@@ -30,7 +30,7 @@ class SampleApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        initializeMoEngageSdk()
+        configureMoEngageSdk()
         initializeMParticleSdk()
     }
 
@@ -51,7 +51,7 @@ class SampleApplication : Application() {
         // MParticle.getInstance()?.Messaging()?.disablePushNotifications()
     }
 
-    private fun initializeMoEngageSdk() {
+    private fun configureMoEngageSdk() {
         val moEngageBuilder = MoEngage.Builder(this, MOENGAGE_APP_ID, DataCenter.DATA_CENTER_1)
             .configureLogs(LogConfig(LogLevel.VERBOSE, true))
             .configureNotificationMetaData(

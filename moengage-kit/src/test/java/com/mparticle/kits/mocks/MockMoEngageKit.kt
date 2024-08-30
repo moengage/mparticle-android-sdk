@@ -44,7 +44,7 @@ class MockMoEngageKit : MoEngageKit() {
 
     override fun getSdkInstance(appId: String): SdkInstance {
         return SdkInstance(
-            instanceMeta = InstanceMeta(MoEngage_APP_ID, true),
+            instanceMeta = InstanceMeta(MoEngage_APP_ID, true, true),
             initConfig = InitConfig(MoEngage_APP_ID),
             config = getDefaultRemoteConfig()
         )

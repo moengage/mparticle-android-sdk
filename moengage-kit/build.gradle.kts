@@ -38,6 +38,9 @@ android {
             )
         }
     }
+    buildFeatures {
+        buildConfig = true
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -53,13 +56,13 @@ dependencies {
         exclude("com.moengage", "core")
     }
     // Todo: Remove this Snapshot build dependency
-    compileOnly("com.moengage:core:6.8.1-SNAPSHOT")
+    compileOnly("com.moengage:core:7.4.2-SNAPSHOT")
 
     testImplementation(moengage.core) {
         exclude("com.moengage", "core")
     }
     // Todo: Remove this Snapshot build dependency
-    testImplementation("com.moengage:core:6.8.1-SNAPSHOT")
+    testImplementation("com.moengage:core:7.4.2-SNAPSHOT")
     testImplementation(libs.mParticleAndroidKitBase)
     testImplementation(moengageInternal.bundles.junitBundle)
     testImplementation(libs.mockito)
