@@ -142,8 +142,7 @@ open class MoEngageKit :
     private fun updateUserIds(isUserModified: Boolean, mParticleUser: MParticleUser) {
         try {
             if (!this::sdkInstance.isInitialized) return
-            sdkInstance.logger.log { "$tag updateUserIds(): isUserModified = $isUserModified" }
-
+            sdkInstance.logger.log { "$tag updateUserIds(): isUserModified = $isUserModified, Identities = ${mParticleUser.userIdentities}" }
             mParticleUser.userIdentities[IdentityType.Email]?.let { email ->
                 MoEAnalyticsHelper.setEmailId(
                     context,
@@ -161,7 +160,7 @@ open class MoEngageKit :
             }
 
             mParticleUser.userIdentities[IdentityType.CustomerId]?.let { id ->
-                sdkInstance.logger.log { "$tag updateUserIds(): isUserModified-$isUserModified, UniqueId-$id" }
+                sdkInstance.logger.log { "$tag updateUserIds(): isUserModified = $isUserModified, UniqueId = $id" }
                 if (isUserModified) {
                     MoEAnalyticsHelper.setAlias(context, id, appId)
                 } else {
@@ -189,7 +188,7 @@ open class MoEngageKit :
     override fun onUserIdentified(mParticleUser: MParticleUser) {
         try {
             if (!this::sdkInstance.isInitialized) return
-            sdkInstance.logger.log { "$tag onUserIdentified(): mParticle Id: ${mParticleUser.id}" }
+            sdkInstance.logger.log { "$tag onUserIdentified(): mParticle Id = ${mParticleUser.id}" }
             integrationHelper.trackAnonymousId(mParticleUser.id.toString(), appId)
         } catch (t: Throwable) {
             sdkInstance.logger.log(LogLevel.ERROR, t) { "$tag onUserIdentified(): " }
@@ -214,7 +213,7 @@ open class MoEngageKit :
     override fun setOptOut(optedOut: Boolean): List<ReportingMessage> {
         try {
             if (!this::sdkInstance.isInitialized) return listOf()
-            sdkInstance.logger.log { "$tag setOptOut(): is tracking opted in-$optedOut" }
+            sdkInstance.logger.log { "$tag setOptOut(): is tracking opted out = $optedOut" }
             if (optedOut) {
                 disableDataTracking(context, appId)
             } else {
@@ -239,16 +238,28 @@ open class MoEngageKit :
     override fun setInstallReferrer(intent: Intent) {
         try {
             if (!this::sdkInstance.isInitialized) return
-            sdkInstance.logger.log { "$tag setInstallReferrer(): data = ${intent.dataString}" }
-            val properties = Properties()
-            properties.addAttribute(REFERRER_EXTRA, intent.dataString)
-            properties.setNonInteractive()
-            MoEAnalyticsHelper.trackEvent(
-                context,
-                INSTALL_REFERRER_EVENT,
-                properties,
-                appId
-            )
+            sdkInstance.logger.log { "$tag setInstallReferrer(): ${intent.extras}" }
+            if (kitPreferences.getBoolean(PREF_KEY_HAS_TRACKED_REFERRER_ATTRIBUTES, false)) {
+                sdkInstance.logger.log { "$tag setInstallReferrer(): referrer already tracked" }
+                return
+            }
+            intent.extras?.let { extra ->
+                if (!extra.keySet().isNullOrEmpty()) {
+                    val properties = Properties()
+                    extra.keySet().forEach { key ->
+                        properties.addAttribute(key, extra.getString(key))
+                    }
+                    properties.setNonInteractive()
+                    MoEAnalyticsHelper.trackEvent(
+                        context,
+                        INSTALL_REFERRER_EVENT,
+                        properties,
+                        appId
+                    )
+                    kitPreferences.edit().putBoolean(PREF_KEY_HAS_TRACKED_REFERRER_ATTRIBUTES, true)
+                        .apply()
+                }
+            }
         } catch (t: Throwable) {
             sdkInstance.logger.log(LogLevel.ERROR, t) { "$tag setInstallReferrer(): " }
         }
@@ -298,6 +309,7 @@ open class MoEngageKit :
             if (!this::sdkInstance.isInitialized) return
             sdkInstance.logger.log { "$tag onSetAllUserAttributes(): " }
             if (!kitPreferences.getBoolean(PREF_KEY_HAS_SYNCED_ATTRIBUTES, false)) {
+                sdkInstance.logger.log { "$tag onSetAllUserAttributes(): setting all the attributes" }
                 for ((attributeKey, attributeValue) in userAttributes) {
                     trackUserAttribute(attributeKey, attributeValue)
                 }
@@ -316,7 +328,7 @@ open class MoEngageKit :
     private fun trackUserAttribute(attributeKey: String, attributeValue: Any) {
         try {
             if (!this::sdkInstance.isInitialized) return
-            sdkInstance.logger.log { "$tag trackUserAttribute(): Key-$attributeKey, Value-$attributeValue" }
+            sdkInstance.logger.log { "$tag trackUserAttribute(): Key = $attributeKey, Value = $attributeValue" }
             var mappedKey = attributeKeyMap[attributeKey] ?: attributeKey
 
             // All the mParticle standard attribute starts with "$".

@@ -29,7 +29,4 @@ const val M_PARTICLE_API_SECRET = "YOUR_M_PARTICLE_API_SECRET"
  */
 const val FCM_SENDER_ID = "YOUR SENDER ID"
 
-/**
- * Todo: Update the KitId
- */
-const val MOENGAGE_KIT_ID = -1
+const val MOENGAGE_KIT_ID = 1167

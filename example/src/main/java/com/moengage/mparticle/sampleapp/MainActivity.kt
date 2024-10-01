@@ -16,6 +16,9 @@ package com.moengage.mparticle.sampleapp
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import com.moengage.core.internal.utils.showToast
+import com.moengage.core.isSdkInitialised
+import com.moengage.inapp.MoEInAppHelper
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,6 +52,13 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<AppCompatButton>(R.id.logoutButton).setOnClickListener {
             MParticleRequestHandler.logoutUser()
+        }
+        findViewById<AppCompatButton>(R.id.showInApp).setOnClickListener {
+            if (isSdkInitialised(MOENGAGE_APP_ID)) {
+                MoEInAppHelper.getInstance().showInApp(this)
+            } else {
+                showToast(this, "MoEngage SDK is not initialised!")
+            }
         }
     }
 }

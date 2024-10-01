@@ -66,6 +66,6 @@ class SampleApplication : Application() {
             )
 
         // Configure the required configuration for MoEngage SDK
-        MoEngage.configureInitConfigForDefaultInstance(moEngageBuilder, IntegrationPartner.M_PARTICLE)
+        MoEngage.configureForDefaultInstance(moEngageBuilder, IntegrationPartner.M_PARTICLE)
     }
 }

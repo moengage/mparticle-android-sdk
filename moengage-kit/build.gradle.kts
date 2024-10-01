@@ -56,7 +56,7 @@ dependencies {
         exclude("com.moengage", "core")
     }
     // Todo: Remove this Snapshot build dependency
-    compileOnly("com.moengage:core:7.4.2-SNAPSHOT")
+    compileOnly("com.moengage:core:7.5.1-SNAPSHOT")
 
     testImplementation(moengage.core) {
         exclude("com.moengage", "core")

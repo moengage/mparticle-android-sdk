@@ -42,11 +42,11 @@ internal object MParticleRequestHandler {
     }
 
     fun enableDataTracking() {
-        MParticle.getInstance()?.optOut = true
+        MParticle.getInstance()?.optOut = false
     }
 
     fun disableDataTracking() {
-        MParticle.getInstance()?.optOut = false
+        MParticle.getInstance()?.optOut = true
     }
 
     fun trackUserLocation() {
