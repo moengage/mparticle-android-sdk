@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 MoEngage Inc.
+ * Copyright (c) 2014-2024 MoEngage Inc.
  *
  * All rights reserved.
  *
@@ -16,7 +16,7 @@ package com.mparticle.kits
 /**
  * Key to get the App Id from mParticle Setting in onKitCreate
  */
-internal const val MOE_APP_ID_KEY = "appId"
+internal const val MOE_APP_ID_KEY = "APP_ID"
 
 /**
  * Dummy MoEngage App Id

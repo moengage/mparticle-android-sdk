@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 MoEngage Inc.
+ * Copyright (c) 2014-2024 MoEngage Inc.
  *
  * All rights reserved.
  *
@@ -371,7 +371,7 @@ open class MoEngageKit :
 
             val properties = Properties()
             properties.addAttribute(EVENT_TYPE_PROPERTIES, event.eventType.toString())
-            event.customAttributeStrings?.let { customAttributes ->
+            event.customAttributes?.let { customAttributes ->
                 for ((customAttributesKey, customAttributesValue) in customAttributes) {
                     properties.addAttribute(customAttributesKey, customAttributesValue)
                 }
@@ -383,7 +383,7 @@ open class MoEngageKit :
             sdkInstance.logger.log(LogLevel.ERROR, t) { "$tag onKitCreate(): mParticle Integration Initialisation Failed" }
         }
 
-        return listOf()
+        return emptyList()
     }
 
     override fun onPushRegistration(instanceId: String, senderId: String): Boolean {

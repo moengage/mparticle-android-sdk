@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 MoEngage Inc.
+ * Copyright (c) 2014-2024 MoEngage Inc.
  *
  * All rights reserved.
  *
@@ -62,7 +62,7 @@ dependencies {
         exclude("com.moengage", "core")
     }
     // Todo: Remove this Snapshot build dependency
-    testImplementation("com.moengage:core:7.4.2-SNAPSHOT")
+    testImplementation("com.moengage:core:7.5.1-SNAPSHOT")
     testImplementation(libs.mParticleAndroidKitBase)
     testImplementation(moengageInternal.bundles.junitBundle)
     testImplementation(libs.mockito)
