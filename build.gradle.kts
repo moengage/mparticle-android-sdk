@@ -18,6 +18,7 @@ plugins {
     alias(moengageInternal.plugins.plugin.kotlin.android) apply false
     alias(moengageInternal.plugins.plugin.ktlint) apply false
     alias(libs.plugins.plugin.google.services) apply false
+    alias(moengageInternal.plugins.plugin.release) apply false
 }
 
 subprojects {

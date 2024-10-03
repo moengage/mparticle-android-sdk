@@ -48,5 +48,4 @@ include(
     ":moengage-kit",
     ":example"
 )
-includeBuild("publishing-plugin")
 rootProject.name = "mparticle-android-integration-moengage"
