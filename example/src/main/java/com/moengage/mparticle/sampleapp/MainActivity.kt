@@ -44,6 +44,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<AppCompatButton>(R.id.customEventButton).setOnClickListener {
             MParticleRequestHandler.trackCustomEvent()
         }
+        findViewById<AppCompatButton>(R.id.commerceEventButton).setOnClickListener {
+            MParticleRequestHandler.trackCommerceEvent()
+        }
         findViewById<AppCompatButton>(R.id.userAttributeButton).setOnClickListener {
             MParticleRequestHandler.trackUserAttributes()
         }

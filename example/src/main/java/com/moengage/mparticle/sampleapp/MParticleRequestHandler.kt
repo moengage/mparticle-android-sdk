@@ -15,9 +15,13 @@ package com.moengage.mparticle.sampleapp
 
 import android.location.Location
 import android.util.Log
+import com.moengage.core.internal.utils.currentMillis
 import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.MParticle.EventType
+import com.mparticle.commerce.CommerceEvent
+import com.mparticle.commerce.Product
+import com.mparticle.commerce.TransactionAttributes
 import com.mparticle.identity.IdentityApiRequest
 
 internal object MParticleRequestHandler {
@@ -78,6 +82,26 @@ internal object MParticleRequestHandler {
             .build()
 
         MParticle.getInstance()?.logEvent(eventWithoutProperties)
+    }
+
+    fun trackCommerceEvent() {
+        val commerceEvent = CommerceEvent.Builder(
+            Product.ADD_TO_CART,
+            Product.Builder("productName", "productSKU", 2.0)
+                .customAttributes(mapOf("customAttrKey" to "customAttrValue"))
+                .category("productCategory")
+                .couponCode("productCouponCode")
+                .position(20)
+                .unitPrice(2.0)
+                .quantity(5.0)
+                .brand("productBrand")
+                .variant("productVariant")
+                .build()
+        ).transactionAttributes(TransactionAttributes("customTransactionId_${currentMillis()}"))
+            .currency("inr")
+            .build()
+
+        MParticle.getInstance()?.logEvent(commerceEvent)
     }
 
     fun trackUserAttributes() {

@@ -43,24 +43,33 @@ import com.mparticle.MParticle.UserAttributes.FIRSTNAME
 import com.mparticle.MParticle.UserAttributes.GENDER
 import com.mparticle.MParticle.UserAttributes.LASTNAME
 import com.mparticle.MParticle.UserAttributes.MOBILE_NUMBER
+import com.mparticle.commerce.CommerceEvent
 import com.mparticle.consent.ConsentState
 import com.mparticle.identity.MParticleUser
+import com.mparticle.kits.CommerceEventUtils
 import com.mparticle.kits.FilteredIdentityApiRequest
 import com.mparticle.kits.FilteredMParticleUser
 import com.mparticle.kits.KitIntegration
+import com.mparticle.kits.KitIntegration.CommerceListener
 import com.mparticle.kits.KitIntegration.EventListener
 import com.mparticle.kits.KitIntegration.IdentityListener
 import com.mparticle.kits.KitIntegration.PushListener
 import com.mparticle.kits.KitIntegration.UserAttributeListener
 import com.mparticle.kits.KitUtils
 import com.mparticle.kits.ReportingMessage
+import java.math.BigDecimal
 import kotlin.jvm.Throws
 
 /**
  * MoEngage Kit to integrate MoEngage Android SDK with mParticle Android SDK
  */
 open class MoEngageKit :
-    KitIntegration(), IdentityListener, UserAttributeListener, EventListener, PushListener {
+    KitIntegration(),
+    IdentityListener,
+    UserAttributeListener,
+    EventListener,
+    CommerceListener,
+    PushListener {
 
     private val tag = "MoEngageKit_${BuildConfig.MOENGAGE_KIT_VERSION}"
 
@@ -212,7 +221,7 @@ open class MoEngageKit :
 
     override fun setOptOut(optedOut: Boolean): List<ReportingMessage> {
         try {
-            if (!this::sdkInstance.isInitialized) return listOf()
+            if (!this::sdkInstance.isInitialized) return emptyList()
             sdkInstance.logger.log { "$tag setOptOut(): is tracking opted out = $optedOut" }
             if (optedOut) {
                 disableDataTracking(context, appId)
@@ -362,7 +371,7 @@ open class MoEngageKit :
 
     override fun logEvent(event: MPEvent): List<ReportingMessage> {
         try {
-            if (!this::sdkInstance.isInitialized) return listOf()
+            if (!this::sdkInstance.isInitialized) return emptyList()
             sdkInstance.logger.log { "$tag logEvent(): " }
             if (event.eventName.isBlank()) {
                 sdkInstance.logger.log(LogLevel.WARN) { "$tag logEvent(): Event name can't be empty" }
@@ -380,7 +389,31 @@ open class MoEngageKit :
 
             return listOf(ReportingMessage.fromEvent(this, event))
         } catch (t: Throwable) {
-            sdkInstance.logger.log(LogLevel.ERROR, t) { "$tag onKitCreate(): mParticle Integration Initialisation Failed" }
+            sdkInstance.logger.log(LogLevel.ERROR, t) { "$tag logEvent(): " }
+        }
+
+        return emptyList()
+    }
+
+    override fun logLtvIncrease(
+        valueIncreased: BigDecimal?,
+        valueTotal: BigDecimal?,
+        eventName: String?,
+        contextInfo: MutableMap<String, String>?
+    ): List<ReportingMessage> = emptyList()
+
+    override fun logEvent(event: CommerceEvent): List<ReportingMessage> {
+        try {
+            if (!this::sdkInstance.isInitialized) return emptyList()
+            sdkInstance.logger.log { "$tag logEvent(): " }
+            val reportingMessages = mutableListOf<ReportingMessage>()
+            CommerceEventUtils.expand(event).forEach { expandedEvent ->
+                logEvent(expandedEvent)
+                reportingMessages.add(ReportingMessage.fromEvent(this, expandedEvent))
+            }
+            return reportingMessages
+        } catch (t: Throwable) {
+            sdkInstance.logger.log(LogLevel.ERROR, t) { "$tag logEvent(): " }
         }
 
         return emptyList()
