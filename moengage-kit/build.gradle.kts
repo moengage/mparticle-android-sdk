@@ -56,13 +56,13 @@ dependencies {
         exclude("com.moengage", "core")
     }
     // Todo: Remove this Snapshot build dependency
-    compileOnly("com.moengage:core:7.5.1-SNAPSHOT")
+    compileOnly("com.moengage:core:7.5.3-SNAPSHOT")
 
     testImplementation(moengage.core) {
         exclude("com.moengage", "core")
     }
     // Todo: Remove this Snapshot build dependency
-    testImplementation("com.moengage:core:7.5.1-SNAPSHOT")
+    testImplementation("com.moengage:core:7.5.3-SNAPSHOT")
     testImplementation(libs.mParticleAndroidKitBase)
     testImplementation(moengageInternal.bundles.junitBundle)
     testImplementation(libs.mockito)
