@@ -85,6 +85,8 @@ open class MoEngageKit :
     ): List<ReportingMessage> {
         val appId = settings[MOE_APP_ID_KEY]
         require(appId != null && !KitUtils.isEmpty(appId)) { "MoEngage App Id can't be empty" }
+        // Required, if dataTracking is disabled and then enabled
+        enableDataTracking(context, appId)
         integrationHelper = MoEIntegrationHelper(context, IntegrationPartner.M_PARTICLE)
         integrationHelper.initialize(appId, context.applicationContext as Application)
         MoEIntegrationHelper.addIntegrationMeta(
