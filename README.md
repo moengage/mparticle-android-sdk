@@ -31,10 +31,7 @@ with `$kitVersion` replaced by the latest version of the mParticle MoEngage Kit.
 
 - Initialize MoEngage SDK
 ```kotlin
-val moEngage = MoEngage.Builder(this, "YOUR APP ID", [YOUR_DATA_CENTER])
-    .enablePartnerIntegration(IntegrationPartner.M_PARTICLE)
-    .build()
-
+val moEngageBuilder = MoEngage.Builder(this, "YOUR APP ID", [YOUR_DATA_CENTER])
 MoEngage.configureForDefaultInstance(moEngageBuilder, IntegrationPartner.M_PARTICLE)
 ```
 

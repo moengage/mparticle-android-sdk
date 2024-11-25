@@ -52,17 +52,9 @@ android {
 
 dependencies {
     compileOnly(libs.mParticleAndroidKitBase)
-    compileOnly(moengage.core) {
-        exclude("com.moengage", "core")
-    }
-    // Todo: Remove this Snapshot build dependency
-    compileOnly("com.moengage:core:7.5.3-SNAPSHOT")
+    compileOnly(moengage.core)
 
-    testImplementation(moengage.core) {
-        exclude("com.moengage", "core")
-    }
-    // Todo: Remove this Snapshot build dependency
-    testImplementation("com.moengage:core:7.5.3-SNAPSHOT")
+    testImplementation(moengage.core)
     testImplementation(libs.mParticleAndroidKitBase)
     testImplementation(moengageInternal.bundles.junitBundle)
     testImplementation(libs.mockito)

@@ -16,8 +16,6 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        // Todo: Remove the snapshot build config before merge to master
-        maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
@@ -27,8 +25,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Todo: Remove the snapshot build config before merge to master
-        maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
     }
 
     versionCatalogs {
@@ -36,7 +32,7 @@ dependencyResolutionManagement {
             from("com.moengage:android-dependency-catalog-internal:2.1.1")
         }
         create("moengage") {
-            from("com.moengage:android-dependency-catalog:4.5.0")
+            from("com.moengage:android-dependency-catalog:4.5.2")
         }
         create("appLibs") {
             from(files("./gradle/appLibs.versions.toml"))
