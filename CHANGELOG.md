@@ -1,6 +1,6 @@
 # mparticle-android-integration-moengage
 
-# Next Release
+# Release Date
 
-## 1.0.0
+## Release Version
 - MoEngage mParticle Android Kit Integration Support
